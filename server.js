@@ -16,9 +16,9 @@ const executions = new Map();
 
 const adminUser = {
   id: randomUUID(),
-  username: "joocode_admin",
-  password: "joodev123",
-  email: "joocode.official@gmail.com",
+  username: "fadeldev_admin",
+  password: "fadeldev123",
+  email: "fadelsm@gmail.com",
   accessLevel: "Owner",
   ipAddress: null,
   createdAt: new Date(),
