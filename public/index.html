@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loker Foto Si fadli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #36454F; /* Charcoal Gray (darker gray) */
+            color: #f8bbd0; /* Light pink for contrast */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            box-sizing: border-box;
+            min-height: 100vh; /* Ensure body takes full height */
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Increased shadow for dark background */
+            padding: 30px;
+            margin-bottom: 30px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            opacity: 0; /* Initially hidden for fade-in effect */
+            transform: translateY(20px); /* Slightly move down for slide-up effect */
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2 {
+            font-family: 'Dancing Script', cursive;
+            color: #ff80ab; /* Changed heading color for contrast with dark background */
+            margin-bottom: 20px;
+        }
+
+        /* Login Section */
+        #login-section input[type="text"],
+        #login-section input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e91e63; /* Adjusted border color */
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease;
+            color: #333; /* Ensure input text is dark */
+            background-color: #fce4ec; /* Light pink input background */
+        }
+
+        #login-section input[type="text"]:focus,
+        #login-section input[type="password"]:focus {
+            border-color: #c2185b; /* Darker Deep Pink on focus */
+        }
+
+        #login-section button {
+            background-color: #e91e63; /* Deep Pink */
+            color: #fff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #login-section button:hover {
+            background-color: #c2185b; /* Darker Deep Pink */
+            transform: translateY(-2px);
+        }
+
+        #login-message {
+            color: #f44336; /* Red for error */
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Photo Gallery Section */
+        #gallery-section {
+            display: none; /* Hidden by default, shown after login */
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            justify-items: center;
+        }
+
+        .photo-item {
+            width: 150px;
+            height: 150px;
+            background-color: #f8bbd0; /* Lighter Pink - initial box color */
+            border: 2px solid #e91e63;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #880e4f; /* Dark Pink for "Klik Foto" text */
+            overflow: hidden;
+            position: relative;
+            cursor: pointer; /* Indicate it's clickable */
+            transition: background-color 0.3s ease; /* Smooth hover */
+        }
+
+        .photo-item:hover {
+            background-color: #ffdce9; /* Slightly lighter pink on hover */
+        }
+
+        .photo-item .click-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* Ensure text is above hidden image */
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            position: absolute; /* Position image over the box */
+            top: 0;
+            left: 0;
+            opacity: 0; /* Hidden by default, will fade in */
+            transition: opacity 1s ease-in-out; /* Fade-in effect */
+            z-index: 0; /* Behind the text initially */
+        }
+
+        /* When image is shown (revealed class added by JS) */
+        .photo-item.revealed img {
+            opacity: 1; /* Make visible */
+        }
+
+        .photo-item.revealed .click-text {
+            display: none; /* Hide text after image is shown */
+        }
+
+        /* Fallback for image errors (if revealed and still no image) */
+        .photo-item.error::after {
+            content: "Foto Error";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffdddd;
+            color: #f44336;
+            font-size: 0.9em;
+            font-weight: bold;
+            border-radius: 8px;
+            opacity: 1; /* Always show error if applicable */
+            z-index: 2; /* Ensure error message is on top */
+            transition: none; /* No transition for error state */
+        }
+
+        /* Hide the image if it failed to load */
+        .photo-item.error img {
+            display: none;
+        }
+
+
+        .pagination {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px; /* Space between pagination and new button */
+        }
+
+        .pagination button {
+            background-color: #ff80ab; /* Medium Pink */
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .pagination button:hover {
+            background-color: #e91e63; /* Deep Pink */
+            transform: translateY(-2px);
+        }
+
+        .pagination button.active {
+            background-color: #c2185b; /* Darker Deep Pink */
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+
+        /* New button for video access */
+        #view-video-button {
+            background-color: #4CAF50; /* Green color for video button */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px; /* Space from photos/pagination */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: none; /* Hidden by default */
+        }
+
+        #view-video-button:hover {
+            background-color: #45a049; /* Darker green on hover */
+            transform: translateY(-2px);
+        }
+
+
+        /* Video Section */
+        #video-section {
+            display: none; /* Hidden by default, shown when video button is clicked */
+        }
+
+        #video-player {
+            width: 100%;
+            max-width: 560px;
+            height: 315px; /* Standard 16:9 aspect ratio */
+            border-radius: 10px;
+            border: 3px solid #ff80ab; /* Changed border color for contrast */
+            margin-top: 20px;
+            background-color: #000; /* Black background for video */
+            outline: none; /* Remove focus outline */
+        }
+
+        .final-message {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5em;
+            color: #ff80ab; /* Changed color for contrast */
+            margin-top: 30px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5); /* Adjusted shadow for dark background */
+            animation: pulse 1.5s infinite alternate; /* Add a pulsating effect */
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="background-music" loop>
+        <source src="your_romantic_song.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <div id="login-section" class="container show">
+        <h1>Tampilan awal<br>Loker Foto si fadli</h1>
+        <form id="login-form">
+            <label for="username">Nama:</label><br>
+            <input type="text" id="username" name="username" placeholder="Masukkan nama"><br><br>
+            <label for="password">Pass:</label><br>
+            <input type="password" id="password" name="password" placeholder="Masukkan password"><br><br>
+            <button type="submit">Login</button>
+            <p id="login-message"></p>
+        </form>
+    </div>
+
+    <div id="gallery-section" class="container">
+        <h2>Kumpulan Foto</h2>
+        <div id="photo-container" class="photo-grid">
+            </div>
+        <div class="pagination" id="pagination-controls">
+            </div>
+        <button id="view-video-button">Lihat Video Spesial</button>
+    </div>
+
+    <div id="video-section" class="container">
+        <h2>Video Diri Sendiri</h2>
+        <video id="video-player" controls>
+            <source src="your_special_video.mp4" type="video/mp4">
+            Browser Anda tidak mendukung elemen video.
+        </video>
+        <p class="final-message">HBD Kal!</p>
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginForm = document.getElementById('login-form');
+        const loginMessage = document.getElementById('login-message');
+        const loginSection = document.getElementById('login-section');
+        const gallerySection = document.getElementById('gallery-section');
+        const videoSection = document.getElementById('video-section');
+        const photoContainer = document.getElementById('photo-container');
+        const paginationControls = document.getElementById('pagination-controls');
+        const backgroundMusic = document.getElementById('background-music');
+        const videoPlayer = document.getElementById('video-player');
+        const viewVideoButton = document.getElementById('view-video-button');
+
+        // Define correct login credentials
+        const correctUsername = "kayla harinda shavika"; // All lowercase for flexible checking
+        const correctPassword = "14-10-2009";
+
+        // *** PENTING: ISI ARRAY INI DENGAN NAMA FILE FOTO ANDA SECARA LENGKAP DAN TEPAT! ***
+        // Pastikan ada 30 entri. Contoh: "photo1.jpg", "photo2.jpg", ..., "photo8.jpg".
+        const photoFileNames = [
+            "photo1.jpg","photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg","photo6.jpg","photo7.jpg","photo8.jpg","photo9.jpg","IMG-20251015-WA0189.jpg"
+            // Contoh jika nama file Anda benar-benar berbeda dan tidak berurutan:
+            // "my_first_pic.jpg", "a_second_pic.jpeg", "holiday_03.png", "random_photo_4.webp", ... (30 entri)
+        ];
+
+        // Photo gallery settings
+        const totalPhotos = photoFileNames.length;
+        const photosPerPage = 2;
+        const totalPages = Math.ceil(totalPhotos / photosPerPage);
+        let currentPage = 1;
+
+        // --- Login Logic ---
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const enteredUsername = usernameInput.value.toLowerCase().trim();
+            const enteredPassword = passwordInput.value.trim();
+
+            if (enteredUsername === correctUsername && enteredPassword === correctPassword) {
+                loginMessage.textContent = '';
+                loginSection.classList.remove('show');
+                loginSection.style.opacity = '0';
+                loginSection.style.transform = 'translateY(20px)';
+
+                setTimeout(() => {
+                    loginSection.style.display = 'none';
+                    gallerySection.style.display = 'block';
+                    setTimeout(() => {
+                        gallerySection.classList.add('show');
+                    }, 50);
+                }, 600);
+
+                backgroundMusic.volume = 0.5;
+                backgroundMusic.play().catch(e => console.error("Music autoplay blocked:", e));
+
+                renderPhotos(currentPage);
+                renderPagination();
+                toggleVideoButtonVisibility();
+            } else {
+                loginMessage.textContent = 'Login ditolak. Nama pengguna atau kata sandi salah.';
+            }
+        });
+
+        // --- Photo Gallery Logic ---
+        function renderPhotos(page) {
+            photoContainer.innerHTML = '';
+            const startIndex = (page - 1) * photosPerPage;
+            const endIndex = Math.min(startIndex + photosPerPage, totalPhotos);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const photoItem = document.createElement('div');
+                photoItem.classList.add('photo-item');
+
+                const clickText = document.createElement('span');
+                clickText.classList.add('click-text');
+                clickText.textContent = 'Klik Foto';
+                photoItem.appendChild(clickText);
+
+                const img = document.createElement('img');
+                // Path ini harus cocok dengan nama folder Anda (case-sensitive)
+                img.src = `photoFileNames/${photoFileNames[i]}`;
+                img.alt = `Foto ${i + 1}`;
+                img.loading = 'eager';
+
+                // Tambahkan event listener untuk menampilkan gambar saat diklik
+                photoItem.addEventListener('click', function() {
+                    if (!photoItem.classList.contains('revealed') && !photoItem.classList.contains('error')) {
+                        photoItem.classList.add('revealed');
+                        // Optional: You could make the image visible immediately and then fade in:
+                        // img.style.opacity = 1; // Or just let CSS transition handle it.
+                    }
+                });
+
+                img.onerror = () => {
+                    console.error(`Gagal memuat gambar: ${img.src}. Pastikan nama folder dan nama file (termasuk huruf besar/kecil dan ekstensi) sudah benar.`);
+                    photoItem.classList.add('error');
+                    photoItem.classList.remove('revealed'); // Ensure it doesn't try to show broken image
+                };
+
+                photoItem.appendChild(img);
+                photoContainer.appendChild(photoItem);
+            }
+        }
+
+        function renderPagination() {
+            paginationControls.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', function() {
+                    currentPage = i;
+                    renderPhotos(currentPage);
+                    updatePaginationActiveButton();
+                    toggleVideoButtonVisibility();
+                });
+                paginationControls.appendChild(button);
+            }
+        }
+
+        function updatePaginationActiveButton() {
+            const buttons = paginationControls.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (parseInt(button.textContent) === currentPage) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // --- Video Button Logic ---
+        function toggleVideoButtonVisibility() {
+            if (currentPage === totalPages) {
+                viewVideoButton.style.display = 'block';
+            } else {
+                viewVideoButton.style.display = 'none';
+            }
+        }
+
+        viewVideoButton.addEventListener('click', () => {
+            gallerySection.classList.remove('show');
+            gallerySection.style.opacity = '0';
+            gallerySection.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                gallerySection.style.display = 'none';
+                videoSection.style.display = 'block';
+                setTimeout(() => {
+                    videoSection.classList.add('show');
+                }, 50);
+
+                backgroundMusic.pause();
+                videoPlayer.play().catch(e => console.error("Video autoplay blocked:", e));
+            }, 600);
+        });
+
+
+        // --- Video Logic ---
+        videoPlayer.addEventListener('play', () => {
+            backgroundMusic.pause();
+        });
+
+        videoPlayer.addEventListener('pause', () => {
+            // No action needed if video paused by user.
+        });
+
+        videoPlayer.addEventListener('ended', () => {
+            // No action needed if video ended.
+        });
+
+        // Fullscreen functionality with F4 key
+        document.addEventListener('keydown', function(event) {
+            if (videoSection.style.display === 'block' && event.key === 'F4') {
+                event.preventDefault();
+
+                if (videoPlayer.requestFullscreen) {
+                    videoPlayer.requestFullscreen();
+                } else if (videoPlayer.mozRequestFullScreen) {
+                    videoPlayer.mozRequestFullScreen();
+                } else if (videoPlayer.webkitRequestFullscreen) {
+                    videoPlayer.webkitRequestFullscreen();
+                } else if (videoPlayer.msRequestFullscreen) {
+                    videoPlayer.msRequestFullscreen();
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

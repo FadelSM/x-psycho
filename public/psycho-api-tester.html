@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psycho Payment API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .result-header {
+            background: #f5f5f5;
+            padding: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .result-content {
+            padding: 20px;
+            background: #fafafa;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        pre {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+
+        .qr-image {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .qr-image img {
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Psycho Payment API Tester</h1>
+            <p>Test endpoint pembayaran Psycho H2H</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                💡 <strong>Info:</strong> Tool ini untuk testing endpoint API Psycho. Pastikan API key valid sebelum melakukan test.
+            </div>
+
+            <form id="testForm">
+                <div class="form-group">
+                    <label>Base URL</label>
+                    <input type="text" id="baseUrl" value="https://atlantich2h.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="apiKey" value="dviVP9oF3jnBESvJx3xMbiVwNAISQ13EWCHtASX2z1BnPgZSQ8AhFYQMkhOUGIfzILVAnVdfqUPG13oUASdt2CO567z4KUHSsvfd" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Endpoint</label>
+                    <select id="endpoint" required>
+                        <option value="/deposit/create">Create Deposit (QRIS)</option>
+                        <option value="/deposit/status">Check Status</option>
+                        <option value="/deposit/instant">Instant Confirm</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nominal (Rp)</label>
+                    <input type="number" id="nominal" value="1000" min="1000" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Reference ID</label>
+                    <input type="text" id="reffId" value="TEST_123456789" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="customerName" value="Test Customer" required>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn-primary">🚀 Test Endpoint</button>
+                    <button type="button" class="btn-secondary" onclick="clearResults()">🗑️ Clear</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Testing endpoint...</p>
+            </div>
+
+            <div class="result-box" id="resultBox">
+                <div class="result-header">
+                    <span>Response:</span>
+                    <span class="status-badge" id="statusBadge"></span>
+                </div>
+                <div class="result-content">
+                    <pre id="resultContent"></pre>
+                    <div class="qr-image" id="qrImage"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const baseUrl = document.getElementById('baseUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const endpoint = document.getElementById('endpoint').value;
+            const nominal = document.getElementById('nominal').value;
+            const reffId = document.getElementById('reffId').value;
+            const customerName = document.getElementById('customerName').value;
+
+            const loading = document.getElementById('loading');
+            const resultBox = document.getElementById('resultBox');
+            const resultContent = document.getElementById('resultContent');
+            const statusBadge = document.getElementById('statusBadge');
+            const qrImage = document.getElementById('qrImage');
+
+            loading.style.display = 'block';
+            resultBox.style.display = 'none';
+            qrImage.innerHTML = '';
+
+            const url = baseUrl + endpoint;
+            
+            let requestBody = {
+                api_key: apiKey
+            };
+
+            if (endpoint === '/deposit/create') {
+                requestBody = {
+                    ...requestBody,
+                    reff_id: reffId,
+                    nominal: parseInt(nominal),
+                    type: 'ewallet',
+                    metode: 'qris',
+                    customer_name: customerName
+                };
+            } else if (endpoint === '/deposit/status') {
+                requestBody = {
+                    ...requestBody,
+                    id: reffId
+                };
+            } else if (endpoint === '/deposit/instant') {
+                requestBody = {
+                    ...requestBody,
+                    id: reffId,
+                    action: true
+                };
+            }
+
+            const requestInfo = {
+                url: url,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: requestBody
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                loading.style.display = 'none';
+                resultBox.style.display = 'block';
+
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    request: requestInfo,
+                    response: data
+                };
+
+                resultContent.textContent = JSON.stringify(result, null, 2);
+
+                if (response.ok && data.success) {
+                    statusBadge.textContent = '✅ Success';
+                    statusBadge.className = 'status-badge status-success';
+
+                    if (data.data && data.data.qr_url) {
+                        qrImage.innerHTML = `
+                            <p style="margin-bottom: 10px; font-weight: 600;">QR Code:</p>
+                            <img src="${data.data.qr_url}" alt="QR Code">
+                        `;
+                    }
+                } else {
+                    statusBadge.textContent = '❌ Error';
+                    statusBadge.className = 'status-badge status-error';
+                }
+
+            } catch (error) {
+                loading.style.display = 'none';
+                resultBox.style.display = 'block';
+                
+                statusBadge.textContent = '❌ Network Error';
+                statusBadge.className = 'status-badge status-error';
+
+                const errorInfo = {
+                    error: error.message,
+                    request: requestInfo,
+                    note: 'CORS error, Network error, atau endpoint tidak tersedia'
+                };
+
+                resultContent.textContent = JSON.stringify(errorInfo, null, 2);
+            }
+        });
+
+        function clearResults() {
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('qrImage').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
