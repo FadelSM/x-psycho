@@ -38,24 +38,24 @@ function showSuccessNotification() {
 // Auth service
 const authService = {
     getStoredUser() {
-        const userData = localStorage.getItem('joomodss_user');
+        const userData = localStorage.getItem('fadelsm_user');
         return userData ? JSON.parse(userData) : null;
     },
 
     isLoggedIn() {
-        return localStorage.getItem('joomodss_session') === 'active';
+        return localStorage.getItem('fadelsm_session') === 'active';
     },
 
     login(user) {
-        localStorage.setItem('joomodss_session', 'active');
-        localStorage.setItem('joomodss_user', JSON.stringify(user));
+        localStorage.setItem('fadelsm_session', 'active');
+        localStorage.setItem('fadelsm_user', JSON.stringify(user));
         currentUser = user;
     },
 
     logout() {
-        localStorage.removeItem('joomodss_session');
-        localStorage.removeItem('joomodss_user');
-        localStorage.removeItem('joomodss_last_submit');
+        localStorage.removeItem('fadelsm_session');
+        localStorage.removeItem('fadelsm_user');
+        localStorage.removeItem('fadelsm_last_submit');
         currentUser = null;
         window.location.href = '/';
     },
@@ -71,12 +71,12 @@ const cooldownService = {
     COOLDOWN_MINUTES: 30,
 
     getLastSubmissionTime() {
-        const time = localStorage.getItem('joomodss_last_submit');
+        const time = localStorage.getItem('fadelsm_last_submit');
         return time ? parseInt(time) : null;
     },
 
     setLastSubmissionTime() {
-        localStorage.setItem('joomodss_last_submit', Date.now().toString());
+        localStorage.setItem('fadelsm_last_submit', Date.now().toString());
     },
 
     isInCooldown() {
